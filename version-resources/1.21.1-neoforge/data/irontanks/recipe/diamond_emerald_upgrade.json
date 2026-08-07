@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gdg",
+    "ege"
+  ],
+  "key": {
+    "d": {
+      "tag": "c:gems/diamond"
+    },
+    "e": {
+      "tag": "c:gems/emerald"
+    },
+    "g": [
+      {
+        "tag": "c:glass_panes/colorless"
+      },
+      {
+        "tag": "c:glass_panes"
+      }
+    ]
+  },
+  "result": {
+    "id": "irontanks:diamond_emerald_upgrade"
+  }
+}

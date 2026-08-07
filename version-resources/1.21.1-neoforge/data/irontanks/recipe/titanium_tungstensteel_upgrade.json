@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gsg",
+    "tgt"
+  ],
+  "key": {
+    "s": {
+      "tag": "c:ingots/titanium"
+    },
+    "t": [
+      {
+        "tag": "c:ingots/tungsten_steel"
+      },
+      {
+        "tag": "c:ingots/tungstensteel"
+      }
+    ],
+    "g": [
+      {
+        "tag": "c:glass_panes/colorless"
+      },
+      {
+        "tag": "c:glass_panes"
+      }
+    ]
+  },
+  "result": {
+    "id": "irontanks:titanium_tungstensteel_upgrade"
+  }
+}

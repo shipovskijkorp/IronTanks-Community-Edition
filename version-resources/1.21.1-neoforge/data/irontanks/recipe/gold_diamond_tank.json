@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gtg",
+    "dgd"
+  ],
+  "key": {
+    "d": {
+      "tag": "c:gems/diamond"
+    },
+    "g": [
+      {
+        "tag": "c:glass/colorless"
+      },
+      {
+        "tag": "c:glass"
+      }
+    ],
+    "t": {
+      "item": "irontanks:gold_tank"
+    }
+  },
+  "result": {
+    "id": "irontanks:diamond_tank"
+  }
+}

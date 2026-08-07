@@ -1,0 +1,12 @@
+
+.gradle/
+build/
+run/
+out/
+.idea/
+*.iml
+versions/*/build/
+versions/*/run/
+versions/*/.gradle/
+libs/**/*.jar
+!libs/**/README.md

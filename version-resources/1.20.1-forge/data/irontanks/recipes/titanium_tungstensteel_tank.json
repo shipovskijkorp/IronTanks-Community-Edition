@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gtg",
+    "mgm"
+  ],
+  "key": {
+    "m": [
+      {
+        "tag": "forge:ingots/tungsten_steel"
+      },
+      {
+        "tag": "forge:ingots/tungstensteel"
+      }
+    ],
+    "g": [
+      {
+        "tag": "forge:glass/colorless"
+      },
+      {
+        "tag": "forge:glass"
+      }
+    ],
+    "t": {
+      "item": "irontanks:titanium_tank"
+    }
+  },
+  "result": {
+    "item": "irontanks:tungstensteel_tank"
+  }
+}

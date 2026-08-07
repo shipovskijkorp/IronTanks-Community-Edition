@@ -1,0 +1,33 @@
+~{buildcraft/json/insn}
+
+// Future BuildCraft external-guide API entry point.
+// The generated manifest/layout/text files are authoritative; this script mirrors the same entries.
+import "buildcraftlib:util" "buildcraftcore:main"
+
+block_full "fluid" "copper_tank" "irontanks:copper_tank"
+block_full "fluid" "iron_tank" "irontanks:iron_tank"
+block_full "fluid" "silver_tank" "irontanks:silver_tank"
+block_full "fluid" "gold_tank" "irontanks:gold_tank"
+block_full "fluid" "diamond_tank" "irontanks:diamond_tank"
+block_full "fluid" "obsidian_tank" "irontanks:obsidian_tank"
+block_full "fluid" "emerald_tank" "irontanks:emerald_tank"
+block_full "fluid" "aluminium_tank" "irontanks:aluminium_tank"
+block_full "fluid" "stainlesssteel_tank" "irontanks:stainlesssteel_tank"
+block_full "fluid" "titanium_tank" "irontanks:titanium_tank"
+block_full "fluid" "tungstensteel_tank" "irontanks:tungstensteel_tank"
+block_full "fluid" "void_tank" "irontanks:void_tank"
+block_full "fluid" "creative_tank" "irontanks:creative_tank"
+item "tank_upgrade" "glass_copper_upgrade" "irontanks:glass_copper_upgrade"
+item "tank_upgrade" "glass_iron_upgrade" "irontanks:glass_iron_upgrade"
+item "tank_upgrade" "copper_iron_upgrade" "irontanks:copper_iron_upgrade"
+item "tank_upgrade" "copper_silver_upgrade" "irontanks:copper_silver_upgrade"
+item "tank_upgrade" "iron_gold_upgrade" "irontanks:iron_gold_upgrade"
+item "tank_upgrade" "silver_gold_upgrade" "irontanks:silver_gold_upgrade"
+item "tank_upgrade" "gold_diamond_upgrade" "irontanks:gold_diamond_upgrade"
+item "tank_upgrade" "diamond_obsidian_upgrade" "irontanks:diamond_obsidian_upgrade"
+item "tank_upgrade" "diamond_emerald_upgrade" "irontanks:diamond_emerald_upgrade"
+item "tank_upgrade" "diamond_aluminium_upgrade" "irontanks:diamond_aluminium_upgrade"
+item "tank_upgrade" "emerald_stainlesssteel_upgrade" "irontanks:emerald_stainlesssteel_upgrade"
+item "tank_upgrade" "aluminium_stainlesssteel_upgrade" "irontanks:aluminium_stainlesssteel_upgrade"
+item "tank_upgrade" "stainlesssteel_titanium_upgrade" "irontanks:stainlesssteel_titanium_upgrade"
+item "tank_upgrade" "titanium_tungstensteel_upgrade" "irontanks:titanium_tungstensteel_upgrade"

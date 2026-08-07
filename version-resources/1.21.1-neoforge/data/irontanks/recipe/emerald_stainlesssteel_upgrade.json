@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gsg",
+    "tgt"
+  ],
+  "key": {
+    "s": {
+      "tag": "c:gems/emerald"
+    },
+    "t": [
+      {
+        "tag": "c:ingots/stainless_steel"
+      },
+      {
+        "tag": "c:ingots/stainlesssteel"
+      }
+    ],
+    "g": [
+      {
+        "tag": "c:glass_panes/colorless"
+      },
+      {
+        "tag": "c:glass_panes"
+      }
+    ]
+  },
+  "result": {
+    "id": "irontanks:emerald_stainlesssteel_upgrade"
+  }
+}

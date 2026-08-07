@@ -1,0 +1,183 @@
+
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '6.0.54'
+}
+
+version = "${mod_version}+${minecraft_version}+forge"
+group = mod_group_id
+
+base {
+    archivesName = "IronTanks-${minecraft_version}-forge"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+    copyIdeResources = true
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', ''
+            property 'forge.logging.console.level', 'info'
+            mods {
+                irontanks { source sourceSets.main }
+            }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', ''
+            property 'forge.logging.console.level', 'info'
+            args '--nogui'
+            mods {
+                irontanks { source sourceSets.main }
+            }
+        }
+    }
+}
+
+
+// These classes belonged to the pre-Stonecutter compatibility layer. They were
+// deliberately removed when IronTanks switched back to BuildCraft's native
+// TileTank/ContainerTank/RenderTank path. Keep them excluded so extracting a
+// newer project over an older checkout cannot accidentally compile stale files.
+def staleLegacySources = [
+        'com/indemnity83/irontanks/client/IronTanksClient.java',
+        'com/indemnity83/irontanks/client/IronTanksClientForgeEvents.java',
+        'com/indemnity83/irontanks/client/IronTanksClientRuntimeCompat.java',
+        'com/indemnity83/irontanks/client/IronTanksClientScreens.java',
+        'com/indemnity83/irontanks/client/gui/IronTanksTankComponent.java',
+        'com/indemnity83/irontanks/client/gui/IronTanksTankScreen.java',
+        'com/indemnity83/irontanks/common/menu/IronTanksTankMenu.java',
+        'com/indemnity83/irontanks/common/registry/IronTanksGuis.java',
+        'com/indemnity83/irontanks/common/registry/IronTanksMenus.java',
+        'com/indemnity83/irontanks/common/util/IronTanksRuntimeCompat.java',
+]
+
+sourceSets.main.java {
+    staleLegacySources.each { exclude it }
+}
+
+// IronTanks does not own the buildcraft.* test namespace. Older overlay
+// checkouts may contain BuildCraft's own JUnit/guide tests under src/test;
+// never feed those foreign tests into this mod's compileTestJava task.
+sourceSets.test.java {
+    exclude 'buildcraft/**'
+}
+sourceSets.test.resources {
+    exclude 'buildcraft/**'
+}
+
+def versionResourceRoot = rootProject.file("version-resources/${project.name}")
+def versionResourceRootPath = versionResourceRoot.toPath().toAbsolutePath().normalize()
+
+sourceSets.main.resources {
+    srcDir versionResourceRoot
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.minecraftforge.net/' }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        // ForgeGradle's fg.deobf publishes remapped dependencies into its own
+        // synthetic repository. Because maven.modrinth is exclusive content,
+        // that repository must be part of the same exclusive scope or Gradle
+        // will try to fetch the _mapped_official artifact from Modrinth itself.
+        forRepositories(fg.repository)
+        filter { includeGroup 'maven.modrinth' }
+    }
+    flatDir { dirs rootProject.file("libs/${project.name}") }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    def localBuildCraftJars = rootProject.fileTree("libs/${project.name}") { include '*.jar' }
+    if (!localBuildCraftJars.isEmpty()) {
+        localBuildCraftJars.files.each { File bcJar ->
+            implementation fg.deobf(files(bcJar))
+        }
+        logger.lifecycle("IronTanks ${project.name}: using local BuildCraft jar(s)")
+    } else {
+        def coordinate = "maven.modrinth:${bcce_modrinth_project}:${buildcraft_version}"
+        implementation fg.deobf(coordinate)
+        logger.lifecycle("IronTanks ${project.name}: using ${coordinate}")
+    }
+}
+
+def resourceProperties = [
+        mod_id                 : mod_id,
+        mod_name               : mod_name,
+        mod_version            : project.version,
+        mod_license            : mod_license,
+        mod_authors            : mod_authors,
+        mod_description        : mod_description,
+        loader_version_range   : loader_version_range,
+        minecraft_version_range: minecraft_version_range,
+        forge_version_range    : forge_version_range,
+        buildcraft_version_range: buildcraft_version_range
+]
+
+processResources {
+    inputs.properties resourceProperties
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Metadata and pack.mcmeta are target-specific. Older IronTanks checkouts may
+    // still contain shared copies under src/main/resources; Stonecutter can also
+    // mirror those stale files into build/generated. Only accept the templates
+    // from version-resources/<target>, otherwise Groovy expand() may try to
+    // resolve legacy expressions such as ${file.jarVersion}.
+    eachFile { details ->
+        if (details.path == 'META-INF/mods.toml' || details.path == 'pack.mcmeta') {
+            def sourcePath = details.file.toPath().toAbsolutePath().normalize()
+            if (!sourcePath.startsWith(versionResourceRootPath)) {
+                details.exclude()
+            } else if (details.path == 'META-INF/mods.toml') {
+                details.expand(resourceProperties)
+            }
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = java_version as int
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'      : mod_name,
+                'Specification-Vendor'     : mod_authors,
+                'Specification-Version'    : '1',
+                'Implementation-Title'     : mod_name,
+                'Implementation-Version'   : project.version,
+                'Implementation-Vendor'    : mod_authors,
+                'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+// Forge 1.19.2/1.20.1 expose reobfJar and require it for distributable output.
+// Forge 1.21.1 does not create that task, so the version nodes opt in explicitly.
+// Keeping the condition outside task callbacks avoids nested TaskContainer mutation
+// while ForgeGradle is still registering reobfJar on Gradle 8.8.
+def enableForgeReobf = providers.gradleProperty('forge_reobf')
+        .map { it.toBoolean() }
+        .getOrElse(false)
+
+if (enableForgeReobf) {
+    jar.finalizedBy('reobfJar')
+}
+

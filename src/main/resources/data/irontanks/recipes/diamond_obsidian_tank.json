@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ooo",
+    "oto",
+    "ooo"
+  ],
+  "key": {
+    "o": {
+      "item": "minecraft:obsidian"
+    },
+    "t": {
+      "item": "irontanks:diamond_tank"
+    }
+  },
+  "result": {
+    "item": "irontanks:obsidian_tank"
+  }
+}

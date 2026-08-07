@@ -1,0 +1,8 @@
+{
+  "parent": "irontanks:block/tank_base",
+  "textures": {
+    "particle": "irontanks:blocks/aluminiumtank/side",
+    "end": "irontanks:blocks/aluminiumtank/end",
+    "side": "irontanks:blocks/aluminiumtank/side"
+  }
+}

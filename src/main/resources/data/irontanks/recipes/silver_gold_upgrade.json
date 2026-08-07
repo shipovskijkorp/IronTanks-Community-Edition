@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gsg",
+    "dgd"
+  ],
+  "key": {
+    "s": {
+      "tag": "forge:ingots/silver"
+    },
+    "d": {
+      "tag": "forge:ingots/gold"
+    },
+    "g": [
+      {
+        "tag": "forge:glass_panes/colorless"
+      },
+      {
+        "tag": "forge:glass_panes"
+      }
+    ]
+  },
+  "result": {
+    "item": "irontanks:silver_gold_upgrade"
+  }
+}

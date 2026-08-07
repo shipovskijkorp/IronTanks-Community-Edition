@@ -1,0 +1,8 @@
+{
+  "parent": "irontanks:block/tank_base",
+  "textures": {
+    "particle": "irontanks:blocks/diamondtank/side_stacked",
+    "end": "irontanks:blocks/diamondtank/end",
+    "side": "irontanks:blocks/diamondtank/side_stacked"
+  }
+}

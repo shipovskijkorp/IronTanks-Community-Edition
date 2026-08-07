@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "igi",
+    "gtg",
+    "igi"
+  ],
+  "key": {
+    "i": {
+      "tag": "c:ingots/iron"
+    },
+    "g": [
+      {
+        "tag": "c:glass/colorless"
+      },
+      {
+        "tag": "c:glass"
+      }
+    ],
+    "t": {
+      "item": "buildcraftfactory:tank"
+    }
+  },
+  "result": {
+    "id": "irontanks:iron_tank"
+  }
+}

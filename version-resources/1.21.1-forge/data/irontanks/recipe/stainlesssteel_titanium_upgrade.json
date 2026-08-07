@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gsg",
+    "tgt"
+  ],
+  "key": {
+    "s": [
+      {
+        "tag": "forge:ingots/stainless_steel"
+      },
+      {
+        "tag": "forge:ingots/stainlesssteel"
+      }
+    ],
+    "t": {
+      "tag": "forge:ingots/titanium"
+    },
+    "g": [
+      {
+        "tag": "forge:glass_panes/colorless"
+      },
+      {
+        "tag": "forge:glass_panes"
+      }
+    ]
+  },
+  "result": {
+    "id": "irontanks:stainlesssteel_titanium_upgrade"
+  }
+}

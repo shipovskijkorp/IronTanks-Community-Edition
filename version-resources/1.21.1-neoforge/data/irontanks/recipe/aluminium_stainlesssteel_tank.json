@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gtg",
+    "mgm"
+  ],
+  "key": {
+    "m": [
+      {
+        "tag": "c:ingots/stainless_steel"
+      },
+      {
+        "tag": "c:ingots/stainlesssteel"
+      }
+    ],
+    "g": [
+      {
+        "tag": "c:glass/colorless"
+      },
+      {
+        "tag": "c:glass"
+      }
+    ],
+    "t": {
+      "item": "irontanks:aluminium_tank"
+    }
+  },
+  "result": {
+    "id": "irontanks:stainlesssteel_tank"
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "format": 1,
+  "language": "en_us",
+  "pages": {
+    "irontanks/block/copper_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 27 buckets (27,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/iron_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 32 buckets (32,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/silver_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 43 buckets (43,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/gold_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 48 buckets (48,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/diamond_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 64 buckets (64,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/obsidian_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 64 buckets (64,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/emerald_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 96 buckets (96,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/aluminium_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 96 buckets (96,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/stainlesssteel_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 128 buckets (128,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/titanium_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 256 buckets (256,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/tungstensteel_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A BuildCraft-compatible tank tier with a capacity of 512 buckets (512,000 mB).",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "Place compatible tanks directly above or below one another to form a vertical fluid column. BuildCraft pipes and machines access the native tank capability."
+    ],
+    "irontanks/block/void_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A compact disposal tank that continuously destroys up to 80 mB of stored fluid per tick.",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "It can join compatible tanks vertically. Fluid reaching this tank is deleted; do not use it for valuable fluids."
+    ],
+    "irontanks/block/creative_tank": [
+      "More room for the fluids that keep industry moving.",
+      "A creative-only source tank. Once filled with a fluid, drains provide that fluid without reducing the stored amount.",
+      "Use tank upgrades to preserve the stored fluid while changing tiers.",
+      "Operation",
+      "The creative tank intentionally refuses vertical tank connections to prevent ambiguous infinite balancing chains."
+    ],
+    "irontanks/item/glass_copper_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a BuildCraft glass tank into a copper tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/glass_iron_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a BuildCraft glass tank into a iron tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/copper_iron_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a copper tank into a iron tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/copper_silver_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a copper tank into a silver tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/iron_gold_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a iron tank into a gold tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/silver_gold_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a silver tank into a gold tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/gold_diamond_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a gold tank into a diamond tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/diamond_obsidian_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a diamond tank into a obsidian tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/diamond_emerald_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a diamond tank into a emerald tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/diamond_aluminium_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a diamond tank into a aluminium tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/emerald_stainlesssteel_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a emerald tank into a stainless steel tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/aluminium_stainlesssteel_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a aluminium tank into a stainless steel tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/stainlesssteel_titanium_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a stainless steel tank into a titanium tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ],
+    "irontanks/item/titanium_tungstensteel_upgrade": [
+      "Upgrade the container, not the cleanup job.",
+      "Converts a titanium tank into a tungsten steel tank in place.",
+      "Use the upgrade on the matching tank block.",
+      "Fluid preservation",
+      "The block is replaced on the server and its complete fluid stack is copied into the new BuildCraft tank before the upgrade item is consumed."
+    ]
+  }
+}

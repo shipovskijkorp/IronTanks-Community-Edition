@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    "gsg",
+    "tgt"
+  ],
+  "key": {
+    "s": {
+      "tag": "c:gems/diamond"
+    },
+    "t": [
+      {
+        "tag": "c:ingots/aluminum"
+      },
+      {
+        "tag": "c:ingots/aluminium"
+      }
+    ],
+    "g": [
+      {
+        "tag": "c:glass_panes/colorless"
+      },
+      {
+        "tag": "c:glass_panes"
+      }
+    ]
+  },
+  "result": {
+    "id": "irontanks:diamond_aluminium_upgrade"
+  }
+}

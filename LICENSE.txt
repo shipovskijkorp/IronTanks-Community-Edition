@@ -1,0 +1,2 @@
+Original Iron Tanks addon sources were provided by the user for porting.
+BuildCraft compatibility code targets BuildCraft Community Edition.
