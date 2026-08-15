@@ -1,17 +1,16 @@
-
 package com.indemnity83.irontanks;
 
 import buildcraft.core.BCCore;
+import com.indemnity83.irontanks.common.guide.IronTanksGuide;
 import com.indemnity83.irontanks.common.registry.IronTanksBlockEntities;
 import com.indemnity83.irontanks.common.registry.IronTanksBlocks;
 import com.indemnity83.irontanks.common.registry.IronTanksItems;
 
 //? if neoforge {
-/*import buildcraft.api.capabilities.BCCapabilityRegistration;
-import buildcraft.lib.misc.CapUtil;
-import net.neoforged.bus.api.IEventBus;
+/*import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 *///?} else {
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -39,13 +38,18 @@ public final class IronTanks {
         IronTanksItems.register(modBus);
         IronTanksBlockEntities.register(modBus);
         BCCore.BUILDCRAFT_TAB.addItemProvider(IronTanksItems::getCreativeTabItems);
+
+        // API2 registration is code-owned and must happen before BuildCraft freezes addon content.
+        IronTanksGuide.register();
     }
 
     //? if neoforge {
     /*private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        BCCapabilityRegistration.registerBlockEntity(event, CapUtil.CAP_FLUIDS, IronTanksBlockEntities.TANK.get());
-        BCCapabilityRegistration.registerBlockEntity(event, CapUtil.CAP_FLUIDS, IronTanksBlockEntities.CREATIVE_TANK.get());
-        BCCapabilityRegistration.registerBlockEntity(event, CapUtil.CAP_FLUIDS, IronTanksBlockEntities.VOID_TANK.get());
+        // NeoForge capabilities belong to the loader, not BuildCraft's internal capability helpers.
+        // BuildCraft API2 discovers these native handlers through its platform fluid bridge.
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, IronTanksBlockEntities.TANK.get(), (tank, side) -> tank);
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, IronTanksBlockEntities.CREATIVE_TANK.get(), (tank, side) -> tank);
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, IronTanksBlockEntities.VOID_TANK.get(), (tank, side) -> tank);
     }
     *///?}
 }

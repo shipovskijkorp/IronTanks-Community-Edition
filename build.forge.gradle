@@ -156,6 +156,13 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 jar {
+    from(rootProject.file('LICENSE.txt')) {
+        rename { 'LICENSE_IronTanks.txt' }
+    }
+    from(rootProject.file('NOTICE.md')) {
+        rename { 'NOTICE_IronTanks.md' }
+    }
+
     manifest {
         attributes([
                 'Specification-Title'      : mod_name,

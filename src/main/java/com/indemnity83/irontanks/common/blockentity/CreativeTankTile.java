@@ -1,7 +1,6 @@
 
 package com.indemnity83.irontanks.common.blockentity;
 
-import buildcraft.api.core.IFluidFilter;
 import buildcraft.factory.tile.TileTank;
 import com.indemnity83.irontanks.common.registry.IronTanksBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -23,11 +22,6 @@ public final class CreativeTankTile extends TankTile {
 
     public CreativeTankTile(BlockPos pos, BlockState state, int capacityMb) {
         super(IronTanksBlockEntities.CREATIVE_TANK.get(), pos, state, capacityMb);
-    }
-
-    @Override
-    public FluidStack drain(IFluidFilter filter, int maxDrain, FluidAction action) {
-        return super.drain(filter, maxDrain, FluidAction.SIMULATE);
     }
 
     @Override

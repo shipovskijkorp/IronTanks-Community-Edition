@@ -16,33 +16,25 @@ VERSIONS = {
     '1.19.2-forge': {
         'minecraft_version': '1.19.2',
         'forge_version': '43.5.0',
-        'buildcraft_version': '8.0.12+1.19.2+forge',
+        'buildcraft_version': '8.0.14+1.19.2+forge',
         'java_version': '17',
         'pack': (9, 9, 10),
     },
     '1.20.1-forge': {
         'minecraft_version': '1.20.1',
         'forge_version': '47.4.10',
-        'buildcraft_version': '8.0.11+1.20.1',
+        'buildcraft_version': '8.0.14+1.20.1+forge',
         'java_version': '17',
         'pack': (15, 15, 15),
-    },
-    '1.21.1-forge': {
-        'minecraft_version': '1.21.1',
-        'forge_version': '52.1.16',
-        'buildcraft_version': '8.0.11+1.21.1+beta1',
-        'java_version': '21',
-        'pack': (34, 34, 48),
     },
     '1.21.1-neoforge': {
         'minecraft_version': '1.21.1',
         'neo_version': '21.1.244',
-        'buildcraft_version': '8.0.11+b1+1.21.1+NeoForge',
+        'buildcraft_version': '8.0.14+1.21.1+neoforge',
         'java_version': '21',
         'pack': (34, 34, 48),
     },
 }
-
 TANKS = (
     'copper_tank', 'iron_tank', 'silver_tank', 'gold_tank', 'diamond_tank',
     'obsidian_tank', 'emerald_tank', 'aluminium_tank', 'stainlesssteel_tank',
@@ -217,6 +209,12 @@ for node in VERSIONS:
         fail(f'Missing current Stonecutter buildscript DSL for {node}')
 if '.buildscript =' in settings:
     fail('Obsolete Stonecutter buildscript assignment syntax remains')
+version_nodes = {path.name for path in (ROOT / 'versions').iterdir() if path.is_dir()}
+resource_nodes = {path.name for path in (ROOT / 'version-resources').iterdir() if path.is_dir()}
+if version_nodes != set(VERSIONS):
+    fail(f'Unexpected versions/ targets: expected={sorted(VERSIONS)}, actual={sorted(version_nodes)}')
+if resource_nodes != set(VERSIONS):
+    fail(f'Unexpected version-resources/ targets: expected={sorted(VERSIONS)}, actual={sorted(resource_nodes)}')
 if 'id("dev.kikugie.stonecutter") version "0.7.11"' not in settings:
     fail('Stonecutter 0.7.11 is not pinned in settings.gradle.kts')
 if 'id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"' not in settings:
@@ -224,6 +222,10 @@ if 'id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"' not 
 root_properties = read_properties(ROOT / 'gradle.properties')
 if root_properties.get('dev.kikugie.stonecutter.hard_mode') != 'true':
     fail('Stonecutter hard_mode acknowledgement is missing')
+if root_properties.get('mod_license') != 'MIT':
+    fail('Iron Tanks metadata must preserve the original MIT license')
+if root_properties.get('mod_name') != 'Iron Tanks Community Edition':
+    fail('Displayed mod name must identify this fork as the Community Edition')
 stonecutter = (ROOT / 'stonecutter.gradle.kts').read_text(encoding='utf-8')
 if 'stonecutter active "1.19.2-forge"' not in stonecutter:
     fail('Stonecutter active node is not declared with the current DSL')
@@ -354,10 +356,15 @@ for relative in STALE_LEGACY_SOURCES:
         fail(f'Stale legacy source still exists on disk: {relative}')
 java_paths = sorted((ROOT / 'src/main/java').rglob('*.java'))
 java_text = '\n'.join(path.read_text(encoding='utf-8') for path in java_paths)
-if len(java_paths) != 13:
-    fail(f'Expected 13 Java sources, found {len(java_paths)}')
+if len(java_paths) != 14:
+    fail(f'Expected 14 Java sources, found {len(java_paths)}')
 if 'ct.buildcraft.' in java_text:
     fail('Legacy ct.buildcraft namespace remains in Java sources')
+legacy_api = re.compile(r'buildcraft\.api\.(?!v2(?:\.|$))')
+if legacy_api.search(java_text):
+    fail('Legacy BuildCraft API import/reference remains; addon must target buildcraft.api.v2')
+if 'buildcraft.lib.internal.' in java_text:
+    fail('Addon reaches into BuildCraft internal implementation packages')
 for forbidden in (
     'IronTanksTankMenu', 'IronTanksTankScreen', 'IronTanksRuntimeCompat',
     'IronTanksClientRuntimeCompat', 'java.lang.reflect',
@@ -365,13 +372,15 @@ for forbidden in (
     if forbidden in java_text:
         fail(f'Obsolete compatibility/UI code remains referenced: {forbidden}')
 for required in (
-    'BCCapabilityRegistration.registerBlockEntity',
-    'CapUtil.CAP_FLUIDS',
+    'Capabilities.FluidHandler.BLOCK',
     'new RenderTank(context)',
     'newTank.balanceTankFluids()',
     'FluidAction.SIMULATE',
     'TRANSFER_PER_TICK = 80',
     'BUILDCRAFT_TAB.addItemProvider',
+    'IronTanksGuide.register()',
+    'BuildCraftContent.addon(IronTanks.MODID)',
+    'GuidePages.item',
 ):
     if required not in java_text:
         fail(f'Missing required port behavior: {required}')
@@ -395,7 +404,7 @@ for field, (source, target) in UPGRADE_SPECS.items():
     if not re.search(pattern, items_source):
         fail(f'Upgrade path changed or is missing: {field} ({source} -> {target})')
 
-# Resolve every Java source for all four nodes and validate target isolation.
+# Resolve every Java source for all maintained BCCE API2 targets and validate target isolation.
 for node, expected in VERSIONS.items():
     loader = 'neoforge' if node.endswith('neoforge') else 'forge'
     version = expected['minecraft_version']
@@ -486,58 +495,65 @@ for language in ('en_us', 'ru_ru', 'zh_cn'):
     if missing:
         fail(f'{language}: missing language keys: {sorted(missing)}')
 
-# Guide consistency and future external-pack isolation.
+# API2 Guide Book integration. Legacy external guide-pack assets must not return.
 guide = assets / 'guide'
+if guide.exists():
+    fail('Legacy assets/irontanks/guide pack remains; Guide Book content must be registered through API2')
 if (ROOT / 'src/main/resources/assets/buildcraft').exists():
-    fail('Guide integration patches the buildcraft namespace; it must stay external')
-manifest = read_json(guide / 'original_manifest.json')
-layouts = read_json(guide / 'page_layouts.json')
-languages = read_json(guide / 'languages.json')
-if (manifest.get('format'), manifest.get('layout_format'), manifest.get('text_pack_format')) != (5, 1, 1):
-    fail('Guide manifest format tuple is not 5/1/1')
-if layouts.get('format') != 1:
-    fail('Guide layout format is not 1')
-if languages.get('format') != 1:
-    fail('Guide languages format is not 1')
-entries = manifest.get('entries', [])
-if len(entries) != 27:
-    fail(f'Expected 27 guide entries, found {len(entries)}')
-ids = [entry.get('id') for entry in entries]
-pages_list = [entry.get('page') for entry in entries]
-stacks = [entry.get('stack') for entry in entries]
-for label, values in (('ids', ids), ('pages', pages_list), ('stacks', stacks)):
-    if len(values) != len(set(values)):
-        fail(f'Guide entry {label} are not unique')
-for entry in entries:
-    if entry.get('module') != 'irontanks' or entry.get('book') != 'buildcraftcore:main':
-        fail(f'Guide entry has wrong module/book: {entry.get("id")}')
-    if entry.get('listed') is not True:
-        fail(f'Guide entry is not listed: {entry.get("id")}')
-    stack = entry.get('stack', '')
-    item_name = stack.split(':', 1)[-1]
-    if item_name not in ITEMS:
-        fail(f'Guide entry references unknown stack: {stack}')
-entry_pages = set(pages_list)
-layout_pages = set(layouts.get('pages', {}))
-if entry_pages != layout_pages:
-    fail(f'Guide manifest/layout page mismatch: missing={sorted(entry_pages-layout_pages)}, extra={sorted(layout_pages-entry_pages)}')
+    fail('Guide integration patches the buildcraft namespace; addon content must stay owned by irontanks')
+
+guide_source_path = ROOT / 'src/main/java/com/indemnity83/irontanks/common/guide/IronTanksGuide.java'
+if not guide_source_path.is_file():
+    fail('Missing API2 IronTanksGuide registrar')
+    guide_source = ''
+else:
+    guide_source = guide_source_path.read_text(encoding='utf-8')
+    for token in (
+        'BuildCraftContent.addon(IronTanks.MODID)',
+        'GuideSection.builder',
+        'GuideEntry.builder',
+        'GuidePages.textKey',
+        'GuidePages.item',
+        '.parent(root)',
+    ):
+        if token not in guide_source:
+            fail(f'API2 guide registrar lost required behavior: {token}')
+    for name in TANKS + UPGRADES:
+        if f'"{name}"' not in guide_source:
+            fail(f'API2 guide registrar does not list {name}')
+
+guide_entries = len(TANKS) + len(UPGRADES)
 for language in ('en_us', 'ru_ru', 'zh_cn'):
-    pack = read_json(guide / 'text' / f'{language}.json')
-    if pack.get('format') != 1 or pack.get('language') != language:
-        fail(f'Guide text header is invalid for {language}')
-    pages = set(pack.get('pages', {}))
-    if pages != entry_pages:
-        fail(f'Guide text mismatch for {language}: missing={sorted(entry_pages-pages)}, extra={sorted(pages-entry_pages)}')
-    for page, values in pack.get('pages', {}).items():
-        expected_slots = layouts['pages'][page]['slots']
-        if len(values) != expected_slots:
-            fail(f'{language}:{page} has {len(values)} text slots, expected {expected_slots}')
-registry_lines = [
-    line.strip() for line in (guide / 'registry/irontanks.txt').read_text(encoding='utf-8').splitlines()
-    if line.strip().startswith(('block_full ', 'item '))
-]
-if len(registry_lines) != 27:
-    fail(f'Guide registry script contains {len(registry_lines)} entries, expected 27')
+    lang = read_json(assets / 'lang' / f'{language}.json')
+    required_guide_keys = {
+        'irontanks.guide.section.root',
+        'irontanks.guide.section.tanks',
+        'irontanks.guide.section.upgrades',
+    }
+    for name in TANKS + UPGRADES:
+        required_guide_keys.add(f'irontanks.guide.{name}.intro')
+        required_guide_keys.add(f'irontanks.guide.{name}.details')
+    missing = required_guide_keys - set(lang)
+    if missing:
+        fail(f'{language}: missing API2 guide translations: {sorted(missing)}')
+
+# Licensing/attribution must travel with source and release JARs.
+license_path = ROOT / 'LICENSE.txt'
+notice_path = ROOT / 'NOTICE.md'
+if not license_path.is_file() or not license_path.read_text(encoding='utf-8').startswith('MIT License'):
+    fail('LICENSE.txt is not the MIT license')
+if not notice_path.is_file():
+    fail('NOTICE.md attribution is missing')
+else:
+    notice = notice_path.read_text(encoding='utf-8')
+    for token in ('indemnity83', 'MIT', 'BuildCraft Community Edition', 'MPL-2.0'):
+        if token not in notice:
+            fail(f'NOTICE.md is missing attribution/license token: {token}')
+for build_file in ('build.forge.gradle', 'build.neoforge.gradle'):
+    build_text = (ROOT / build_file).read_text(encoding='utf-8')
+    for token in ('LICENSE_IronTanks.txt', 'NOTICE_IronTanks.md'):
+        if token not in build_text:
+            fail(f'{build_file} does not bundle {token}')
 
 # Versioned data layout and recipe/loot conventions.
 for node in VERSIONS:
@@ -604,7 +620,7 @@ if errors:
 
 print('IronTanks port verification passed.')
 print(f'JSON files: {len(json_files)}')
-print(f'Guide entries: {len(entries)}')
+print(f'Guide entries: {guide_entries}')
 print(f'Java sources: {len(java_paths)}')
 print(f'Targets: {len(VERSIONS)}')
-print('Resolved Stonecutter source variants: 4')
+print('Resolved Stonecutter source variants: 3')
