@@ -510,8 +510,12 @@ for model_path in block_models + item_models:
         if not texture_path.is_file():
             fail(f'{model_path.relative_to(ROOT)}: missing texture {texture_id}')
 
-# Normal language packs must cover all blocks/items and tooltips.
-for language in ('en_us', 'ru_ru', 'zh_cn'):
+# The main ITCE JAR intentionally ships English only. Other locales live in the localization add-on.
+lang_dir = assets / 'lang'
+lang_files = sorted(lang_dir.glob('*.json'))
+if {path.name for path in lang_files} != {'en_us.json'}:
+    fail(f'ITCE must ship only en_us localization, found: {sorted(path.name for path in lang_files)}')
+for language in ('en_us',):
     lang_path = assets / 'lang' / f'{language}.json'
     lang = read_json(lang_path)
     expected_keys = {f'block.irontanks.{name}' for name in TANKS}
@@ -553,7 +557,7 @@ else:
             fail(f'API2 guide registrar does not list {name}')
 
 guide_entries = len(TANKS) + len(UPGRADES)
-for language in ('en_us', 'ru_ru', 'zh_cn'):
+for language in ('en_us',):
     lang = read_json(assets / 'lang' / f'{language}.json')
     required_guide_keys = {
         'irontanks.guide.section.root',

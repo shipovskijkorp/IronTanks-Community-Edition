@@ -9,7 +9,6 @@ Current source targets:
 - Minecraft 1.19.2 + Forge
 - Minecraft 1.20.1 + Forge
 - Minecraft 1.21.1 + NeoForge
-- BuildCraft Community Edition 8.0.14 or newer with Extension API 2
 
 The addon registers its BuildCraft Guide Book content through `buildcraft.api.v2` and uses loader-native
 fluid capabilities for platform integration.
