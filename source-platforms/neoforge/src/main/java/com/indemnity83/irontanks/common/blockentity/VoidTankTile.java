@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 
 public final class VoidTankTile extends TankTile {
-    * Matches the default BuildCraft CE void fluid pipe rate: base fluid rate 10 * 8.
+    /** Matches the default BuildCraft CE void fluid pipe rate: base fluid rate 10 * 8. */
     private static final int TRANSFER_PER_TICK = 80;
 
     public VoidTankTile(BlockPos pos, BlockState state) {
