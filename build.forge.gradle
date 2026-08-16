@@ -100,15 +100,25 @@ repositories {
     flatDir { dirs rootProject.file("libs/${project.name}") }
 }
 
+def bcceDependencyMode = providers.gradleProperty('bcce_dependency_mode')
+        .map { it.trim().toLowerCase(java.util.Locale.ROOT) }
+        .getOrElse('modrinth')
+if (!(bcceDependencyMode in ['local', 'modrinth'])) {
+    throw new GradleException("Unsupported bcce_dependency_mode='${bcceDependencyMode}'. Expected 'local' or 'modrinth'.")
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    def localBuildCraftJars = rootProject.fileTree("libs/${project.name}") { include '*.jar' }
-    if (!localBuildCraftJars.isEmpty()) {
-        localBuildCraftJars.files.each { File bcJar ->
-            implementation fg.deobf(files(bcJar))
+    if (bcceDependencyMode == 'local') {
+        def localBuildCraftJar = rootProject.file(buildcraft_local_jar)
+        if (!localBuildCraftJar.isFile()) {
+            throw new GradleException(
+                    "IronTanks ${project.name}: local BCCE jar not found: ${localBuildCraftJar}. " +
+                    "Build BCCE first or switch to -Pbcce_dependency_mode=modrinth.")
         }
-        logger.lifecycle("IronTanks ${project.name}: using local BuildCraft jar(s)")
+        implementation fg.deobf(files(localBuildCraftJar))
+        logger.lifecycle("IronTanks ${project.name}: using local BCCE jar ${localBuildCraftJar.name}")
     } else {
         def coordinate = "maven.modrinth:${bcce_modrinth_project}:${buildcraft_version}"
         implementation fg.deobf(coordinate)

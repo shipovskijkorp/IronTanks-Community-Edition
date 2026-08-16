@@ -17,6 +17,7 @@ VERSIONS = {
         'minecraft_version': '1.19.2',
         'forge_version': '43.5.0',
         'buildcraft_version': '8.0.14+1.19.2+forge',
+        'buildcraft_local_jar': 'libs/BuildCraft-Community-Edition-8.0.14+1.19.2+forge.jar',
         'java_version': '17',
         'pack': (9, 9, 10),
     },
@@ -24,6 +25,7 @@ VERSIONS = {
         'minecraft_version': '1.20.1',
         'forge_version': '47.4.10',
         'buildcraft_version': '8.0.14+1.20.1+forge',
+        'buildcraft_local_jar': 'libs/BuildCraft-Community-Edition-8.0.14+1.20.1+forge.jar',
         'java_version': '17',
         'pack': (15, 15, 15),
     },
@@ -31,6 +33,7 @@ VERSIONS = {
         'minecraft_version': '1.21.1',
         'neo_version': '21.1.244',
         'buildcraft_version': '8.0.14+1.21.1+neoforge',
+        'buildcraft_local_jar': 'libs/BuildCraft-Community-Edition-8.0.14+1.21.1+neoforge.jar',
         'java_version': '21',
         'pack': (34, 34, 48),
     },
@@ -226,6 +229,8 @@ if root_properties.get('mod_license') != 'MIT':
     fail('Iron Tanks metadata must preserve the original MIT license')
 if root_properties.get('mod_name') != 'Iron Tanks Community Edition':
     fail('Displayed mod name must identify this fork as the Community Edition')
+if root_properties.get('bcce_dependency_mode') != 'local':
+    fail('BCCE dependency mode should default to local while 8.0.14 is unreleased')
 stonecutter = (ROOT / 'stonecutter.gradle.kts').read_text(encoding='utf-8')
 if 'stonecutter active "1.19.2-forge"' not in stonecutter:
     fail('Stonecutter active node is not declared with the current DSL')
@@ -277,6 +282,17 @@ for build_name in ('build.forge.gradle', 'build.neoforge.gradle'):
         fail(f'{build_name}: Target-local resource root guard is missing')
     if 'sourcePath.startsWith(versionResourceRootPath)' not in build_text or 'details.exclude()' not in build_text:
         fail(f'{build_name}: Stale shared loader metadata exclusion is missing')
+    for token in (
+        "providers.gradleProperty('bcce_dependency_mode')",
+        "bcceDependencyMode in ['local', 'modrinth']",
+        "rootProject.file(buildcraft_local_jar)",
+        "bcceDependencyMode == 'local'",
+        "-Pbcce_dependency_mode=modrinth",
+    ):
+        if token not in build_text:
+            fail(f'{build_name}: explicit local/Modrinth BCCE dependency switch is incomplete; missing {token!r}')
+    if "fileTree(\"libs/${project.name}\")" in build_text:
+        fail(f'{build_name}: obsolete implicit local-jar auto-detection remains')
 
 stale_test_root = ROOT / 'src/test'
 if stale_test_root.exists():
@@ -292,6 +308,15 @@ for stale_resource in (
     if stale_resource.exists():
         fail(f'Stale shared target-specific resource still exists: {stale_resource.relative_to(ROOT)}')
 
+libs_readme = ROOT / 'libs/README.md'
+if not libs_readme.is_file():
+    fail('Missing libs/README.md for local BCCE jar setup')
+else:
+    libs_text = libs_readme.read_text(encoding='utf-8')
+    for expected in (entry['buildcraft_local_jar'].split('/', 1)[1] for entry in VERSIONS.values()):
+        if expected not in libs_text:
+            fail(f'libs/README.md does not document local jar {expected}')
+
 # Project matrix, exact versions and pack metadata.
 for node, expected in VERSIONS.items():
     properties_path = ROOT / 'versions' / node / 'gradle.properties'
@@ -299,7 +324,7 @@ for node, expected in VERSIONS.items():
         fail(f'Missing version properties: {node}')
         continue
     properties = read_properties(properties_path)
-    for key in ('minecraft_version', 'buildcraft_version', 'java_version'):
+    for key in ('minecraft_version', 'buildcraft_version', 'buildcraft_local_jar', 'java_version'):
         if properties.get(key) != expected[key]:
             fail(f'{node}: {key}={properties.get(key)!r}, expected {expected[key]!r}')
     loader_key = 'neo_version' if node.endswith('neoforge') else 'forge_version'

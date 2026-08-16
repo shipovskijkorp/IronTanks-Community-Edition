@@ -8,5 +8,6 @@ out/
 versions/*/build/
 versions/*/run/
 versions/*/.gradle/
+libs/*.jar
 libs/**/*.jar
 !libs/**/README.md

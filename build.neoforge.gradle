@@ -95,11 +95,23 @@ neoForge {
     }
 }
 
+def bcceDependencyMode = providers.gradleProperty('bcce_dependency_mode')
+        .map { it.trim().toLowerCase(java.util.Locale.ROOT) }
+        .getOrElse('modrinth')
+if (!(bcceDependencyMode in ['local', 'modrinth'])) {
+    throw new GradleException("Unsupported bcce_dependency_mode='${bcceDependencyMode}'. Expected 'local' or 'modrinth'.")
+}
+
 dependencies {
-    def localBuildCraftJars = rootProject.fileTree("libs/${project.name}") { include '*.jar' }
-    if (!localBuildCraftJars.isEmpty()) {
-        implementation files(localBuildCraftJars.files)
-        logger.lifecycle("IronTanks ${project.name}: using local BuildCraft jar(s)")
+    if (bcceDependencyMode == 'local') {
+        def localBuildCraftJar = rootProject.file(buildcraft_local_jar)
+        if (!localBuildCraftJar.isFile()) {
+            throw new GradleException(
+                    "IronTanks ${project.name}: local BCCE jar not found: ${localBuildCraftJar}. " +
+                    "Build BCCE first or switch to -Pbcce_dependency_mode=modrinth.")
+        }
+        implementation files(localBuildCraftJar)
+        logger.lifecycle("IronTanks ${project.name}: using local BCCE jar ${localBuildCraftJar.name}")
     } else {
         def coordinate = "maven.modrinth:${bcce_modrinth_project}:${buildcraft_version}"
         implementation coordinate
