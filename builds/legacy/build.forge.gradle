@@ -1,0 +1,248 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '6.0.54'
+}
+
+
+
+def targetName = project.name
+def buildGeneration = 'legacy'
+def repositoryRoot = rootProject.file('../..').canonicalFile
+
+def commonConfigFile = new File(repositoryRoot, 'build-config/common.properties')
+def targetConfigFile = rootProject.file('targets.properties')
+if (!commonConfigFile.isFile() || !targetConfigFile.isFile()) {
+    throw new GradleException("Missing Iron Tanks configuration for ${buildGeneration} build")
+}
+
+def targetConfiguration = new Properties()
+commonConfigFile.withInputStream { targetConfiguration.load(it) }
+targetConfigFile.withInputStream { targetConfiguration.load(it) }
+
+def configuredProperty = { String key ->
+    if (project.hasProperty(key)) {
+        return project.property(key).toString().trim()
+    }
+    def targetValue = targetConfiguration.getProperty("target.${targetName}.${key}")
+    if (targetValue != null) {
+        return targetValue.trim()
+    }
+    def commonValue = targetConfiguration.getProperty("common.${key}")
+    commonValue != null ? commonValue.trim() : null
+}
+
+def requiredProperty = { String key ->
+    def value = configuredProperty(key)
+    if (value == null || value.isEmpty()) {
+        throw new GradleException("Missing target property '${key}' for '${targetName}'")
+    }
+    value
+}
+
+def minecraftVersion = requiredProperty('deps.minecraft')
+def forgeVersion = requiredProperty('deps.forge')
+def modVersion = requiredProperty('mod.version')
+def archiveName = requiredProperty('mod.archive_name')
+def javaVersion = Integer.parseInt(requiredProperty('java.version'))
+def sharedSourceRoot = new File(repositoryRoot, requiredProperty('source.shared_root'))
+def familySourceRoot = new File(repositoryRoot, requiredProperty('source.root'))
+def platformSourceRoot = new File(repositoryRoot, requiredProperty('source.platform_root'))
+def targetOverlayRoot = new File(repositoryRoot, requiredProperty('source.overlay_root'))
+def sourceLayers = [sharedSourceRoot, familySourceRoot, platformSourceRoot, targetOverlayRoot]
+
+sourceLayers.each { layer ->
+    if (!layer.isDirectory()) {
+        throw new GradleException("Configured source layer '${layer}' for '${targetName}' does not exist")
+    }
+}
+
+def effectiveSourceRoot = layout.buildDirectory.dir("effective-source/${targetName}")
+def sourceLayoutScript = new File(repositoryRoot, 'scripts/source_layout.py')
+def defaultPythonExecutable = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows') ? 'python' : 'python3'
+def pythonExecutable = providers.gradleProperty('pythonExecutable')
+        .orElse(providers.environmentVariable('PYTHON'))
+        .getOrElse(defaultPythonExecutable)
+def prepareEffectiveSource = tasks.register('prepareEffectiveSource', Exec) {
+    group = 'build setup'
+    description = "Materialize Iron Tanks source layers for ${targetName}"
+    workingDir repositoryRoot
+    environment 'PYTHONDONTWRITEBYTECODE', '1'
+    inputs.files(sourceLayers)
+    inputs.files(commonConfigFile, targetConfigFile, sourceLayoutScript)
+    outputs.dir(effectiveSourceRoot)
+    commandLine pythonExecutable, sourceLayoutScript.absolutePath, targetName,
+            '--config', targetConfigFile.absolutePath,
+            '--output', effectiveSourceRoot.get().asFile.absolutePath
+}
+
+def effectiveSourceDir = effectiveSourceRoot.get().asFile
+
+version = "${modVersion}+${targetName.replace('-', '+')}"
+group = requiredProperty('mod.group')
+base {
+    archivesName = archiveName
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
+
+sourceSets {
+    main {
+        java.setSrcDirs([new File(effectiveSourceDir, 'src/main/java')])
+        resources.setSrcDirs([new File(effectiveSourceDir, 'src/main/resources')])
+    }
+    test {
+        java.setSrcDirs([new File(effectiveSourceDir, 'src/test/java')])
+        resources.setSrcDirs([new File(effectiveSourceDir, 'src/test/resources')])
+    }
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraftVersion
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory new File(repositoryRoot, "run/${buildGeneration}/${targetName}")
+            property 'forge.logging.markers', ''
+            property 'forge.logging.console.level', 'info'
+            mods {
+                irontanks { source sourceSets.main }
+            }
+        }
+        client { }
+        server { args '--nogui' }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.minecraftforge.net/' }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        forRepositories(fg.repository)
+        filter { includeGroup 'maven.modrinth' }
+    }
+}
+
+def bcceDependencyMode = (project.findProperty('bcce_dependency_mode') ?: requiredProperty('deps.buildcraft.mode'))
+        .toString().trim().toLowerCase(Locale.ROOT)
+if (!(bcceDependencyMode in ['local', 'modrinth'])) {
+    throw new GradleException("Unsupported bcce_dependency_mode='${bcceDependencyMode}'. Expected 'local' or 'modrinth'.")
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}"
+
+    if (bcceDependencyMode == 'local') {
+        def localBuildCraftJar = new File(repositoryRoot, requiredProperty('buildcraft.local_jar'))
+        if (!localBuildCraftJar.isFile()) {
+            throw new GradleException(
+                    "Iron Tanks ${targetName}: local BCCE jar not found: ${localBuildCraftJar}. " +
+                    "Build BCCE first or use -Pbcce_dependency_mode=modrinth after the target is published.")
+        }
+        implementation fg.deobf(files(localBuildCraftJar))
+        logger.lifecycle("Iron Tanks ${targetName}: using local BCCE jar ${localBuildCraftJar.name}")
+    } else {
+        def coordinate = "maven.modrinth:${requiredProperty('deps.buildcraft.modrinth_project')}:${requiredProperty('buildcraft.version')}"
+        implementation fg.deobf(coordinate)
+        logger.lifecycle("Iron Tanks ${targetName}: using ${coordinate}")
+    }
+}
+
+def resourceProperties = [
+        mod_id                  : requiredProperty('mod.id'),
+        mod_name                : requiredProperty('mod.name'),
+        mod_version             : project.version.toString(),
+        mod_license             : requiredProperty('mod.license'),
+        mod_authors             : requiredProperty('mod.authors'),
+        mod_description         : requiredProperty('mod.description'),
+        loader_version_range    : requiredProperty('loader.version_range'),
+        minecraft_version_range : requiredProperty('minecraft.version_range'),
+        forge_version_range     : requiredProperty('forge.version_range'),
+        buildcraft_version_range: requiredProperty('buildcraft.version_range')
+]
+
+tasks.named('processResources', ProcessResources) {
+    inputs.properties resourceProperties
+    filesMatching(['META-INF/mods.toml']) {
+        expand(resourceProperties)
+    }
+}
+
+tasks.named('jar', Jar) {
+    archiveClassifier = ''
+    from(new File(repositoryRoot, 'LICENSE.txt')) {
+        rename { 'LICENSE_IronTanks.txt' }
+    }
+    from(new File(repositoryRoot, 'NOTICE.md')) {
+        rename { 'NOTICE_IronTanks.md' }
+    }
+    manifest {
+        attributes([
+                'Specification-Title'      : requiredProperty('mod.name'),
+                'Specification-Vendor'     : requiredProperty('mod.authors'),
+                'Specification-Version'    : modVersion,
+                'Implementation-Title'     : requiredProperty('mod.name'),
+                'Implementation-Version'   : project.version,
+                'Implementation-Vendor'    : requiredProperty('mod.authors'),
+                'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+def enableForgeReobf = requiredProperty('forge.reobf').toBoolean()
+afterEvaluate {
+    if (enableForgeReobf) {
+        def reobfTask = tasks.findByName('reobfJar')
+        if (reobfTask == null) {
+            throw new GradleException("${targetName}: forge.reobf=true but reobfJar is unavailable")
+        }
+        tasks.getByName('jar').finalizedBy(reobfTask)
+    }
+}
+
+def releaseOutputDir = new File(repositoryRoot, "build/libs/${buildGeneration}/${modVersion}")
+tasks.register('buildAndCollect', Copy) {
+    group = 'build'
+    description = "Build and collect the ${targetName} production jar"
+    dependsOn tasks.named('build')
+    from tasks.named('jar', Jar).flatMap { it.archiveFile }
+    into releaseOutputDir
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven { url = new File(repositoryRoot, "mcmodsrepo/${buildGeneration}").toURI() }
+    }
+}
+
+tasks.withType(ProcessResources).configureEach {
+    dependsOn prepareEffectiveSource
+}
+tasks.withType(JavaCompile).configureEach {
+    dependsOn prepareEffectiveSource
+    options.encoding = 'UTF-8'
+    options.release = javaVersion
+}
+
+idea.module {
+    downloadJavadoc = true
+    downloadSources = true
+}
+eclipse.classpath {
+    downloadJavadoc = true
+    downloadSources = true
+}

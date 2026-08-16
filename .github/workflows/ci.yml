@@ -1,0 +1,122 @@
+name: Iron Tanks CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: irontanks-multibuild-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate source architecture and port invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate independent Stonecutter builds
+        run: python scripts/validate-stonecutter.py
+
+      - name: Validate layered source tree
+        run: python scripts/validate-source-families.py
+
+      - name: Verify Iron Tanks port invariants
+        run: python scripts/verify_port.py
+
+  build:
+    name: Build ${{ matrix.generation }} targets
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        generation:
+          - legacy
+          - modern
+    env:
+      BUILD_GENERATION: ${{ matrix.generation }}
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dfile.encoding=UTF-8
+
+    steps:
+      - name: Checkout Iron Tanks
+        uses: actions/checkout@v4
+
+      - name: Checkout BuildCraft Community Edition
+        uses: actions/checkout@v4
+        with:
+          repository: CurativeTree/BuildCraft
+          ref: main
+          path: .ci/BuildCraft
+
+      - name: Set up Java toolchains
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make wrappers executable
+        run: |
+          chmod +x builds/legacy/gradlew builds/modern/gradlew build-all.sh scripts/source_layout.py
+          chmod +x .ci/BuildCraft/builds/legacy/gradlew .ci/BuildCraft/builds/modern/gradlew
+
+      - name: Build matching BCCE generation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd ".ci/BuildCraft/builds/${BUILD_GENERATION}"
+          ./gradlew --no-daemon --console=plain --stacktrace buildAndCollect
+
+      - name: Stage local BCCE jars
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p libs
+          find ".ci/BuildCraft/build/libs/${BUILD_GENERATION}/8.0.14" -maxdepth 1 -type f \
+            -name 'BuildCraft-Community-Edition-8.0.14+*.jar' -exec cp {} libs/ \;
+          echo "Staged BCCE jars:"
+          ls -1 libs/*.jar
+
+      - name: Build Iron Tanks generation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "builds/${BUILD_GENERATION}"
+          ./gradlew --no-daemon --console=plain --stacktrace buildAndCollect
+
+      - name: Upload production jars and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: irontanks-${{ matrix.generation }}-${{ github.run_number }}-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            build/libs/${{ matrix.generation }}/**
+            builds/${{ matrix.generation }}/versions/*/build/libs/**
+            builds/${{ matrix.generation }}/versions/*/build/reports/**
+            run/${{ matrix.generation }}/*/logs/**
+            run/${{ matrix.generation }}/*/crash-reports/**

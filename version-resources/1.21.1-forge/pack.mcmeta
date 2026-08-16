@@ -1,8 +1,0 @@
-{
-  "pack": {
-    "description": "Iron Tanks resources and data for 1.21.1-forge",
-    "pack_format": 34,
-    "forge:resource_pack_format": 34,
-    "forge:data_pack_format": 48
-  }
-}

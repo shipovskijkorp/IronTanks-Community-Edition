@@ -1,13 +1,37 @@
+# Eclipse
+bin/
+*.launch
+.settings/
+.metadata/
+.classpath
+.project
 
+# IntelliJ IDEA
+out/
+*.ipr
+*.iws
+*.iml
+.idea/
+
+# Gradle / Stonecutter generated projects
 .gradle/
 build/
+/builds/*/.gradle/
+/builds/*/build/
+/builds/*/versions/
+
+# Development runs
 run/
-out/
-.idea/
-*.iml
-versions/*/build/
-versions/*/run/
-versions/*/.gradle/
+run-data/
+run-server/
+logs/
+mcmodsrepo/
+
+# Local BuildCraft jars
 libs/*.jar
 libs/**/*.jar
 !libs/**/README.md
+
+# Python caches
+__pycache__/
+*.pyc
