@@ -467,6 +467,9 @@ blockstates = sorted((assets / 'blockstates').glob('*.json'))
 block_models = sorted((assets / 'models/block').glob('*.json'))
 item_models = sorted((assets / 'models/item').glob('*.json'))
 textures = sorted((assets / 'textures').rglob('*.png'))
+legacy_block_textures = assets / 'textures/blocks'
+if legacy_block_textures.exists():
+    fail('Legacy textures/blocks directory remains; tank sprites must live under textures/block for modern block atlases')
 if {path.stem for path in blockstates} != set(TANKS):
     fail('Blockstate set does not exactly match the 13 registered tanks')
 if len(block_models) != 27:
@@ -493,6 +496,8 @@ for blockstate_path in blockstates:
 
 for model_path in block_models + item_models:
     model = read_json(model_path)
+    if 'irontanks:blocks/' in model_path.read_text(encoding='utf-8'):
+        fail(f'{model_path.relative_to(ROOT)}: legacy irontanks:blocks sprite id is not stitched by modern block atlases')
     parent = model.get('parent')
     if isinstance(parent, str) and parent.startswith('irontanks:block/'):
         local_parent = assets / 'models/block' / f'{parent.split("/", 1)[1]}.json'
